@@ -83,7 +83,7 @@ def main_init():
 if __name__ == "__main__":
     seed()
     
-    # Открываем сессию заново для проверки счета
+   
     check_db = SessionLocal()
     count = check_db.query(models.CanaSystem).count()
     print(f"session in cana {count} .")
