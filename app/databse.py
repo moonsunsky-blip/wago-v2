@@ -4,7 +4,7 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 
 
-APP = os.path.abspath.dirname(os.path.abspath(__file__))
+APP = os.path.dirname(os.path.abspath(__file__))
 BASEDIR = os.path.dirname(APP)
 PATH = os.path.join(BASEDIR, "data", "japanese_N5.db")
 
