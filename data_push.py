@@ -1,7 +1,7 @@
 import os
 import sqlite3
 
-from app.databse import engine, SessionLocal
+from app.database import engine, SessionLocal
 import model.letter_models as models
 
 # ============================================
@@ -20,10 +20,10 @@ HIRAGANA = os.path.join(BASE_DIR, "data", "hiragana.txt")
 
 # ============================================
 
-def parse_with_model(file_read, alphabet_type="hiragana"):
+def pirsing(file_read):
     read_list = []
 
-    with open(file_read, "r", encoding="utf-8") as file:
+    with open(file_read, "r", encoding = "utf-8") as file:
         for line in file:
             line = line.strip()
 
@@ -31,61 +31,56 @@ def parse_with_model(file_read, alphabet_type="hiragana"):
                 continue
             parts = [p.strip() for p in line.split("|")]
 
-            if len(parts) == 3:
-                hiragana = models.CanaSystem(
-                    letter=parts[0],
-                    romaji=parts[1],
-                    translate=parts[2],
-                    type=alphabet_type
+            if len(parts) == 4:
+                kanji_obj = models.Kanji(
+                    letter = parts[0],
+                    onyomi=parts[1],
+                    kunyomi=parts[2],
+                    meaning=parts[3]
                 )
-                read_list.append(hiragana)
+                read_list.append(kanji_obj)
 
     return read_list
 
-def seed():
-    db_session = SessionLocal() 
 
-    print("load....")
+
+# ============================================
+
+def seed_kanji():
+    db = SessionLocal()
 
     try:
-        current_path = os.path.dirname(os.path.abspath(__file__))
-        file_path = os.path.join(current_path, "data", "txt_data", "hiragana.txt")
+        dir_path = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(dir_path, "data", "txt_data", "kanji.txt")
 
-        
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"file not found: {file_path}")
 
-        
-        clean_path = os.path.abspath(file_path)
+        kanji_list = pirsing(file_path)
 
-        hiragana_objects = parse_with_model(clean_path, alphabet_type="hiragana")
-
-        
-        db_session.add_all(hiragana_objects)
-        db_session.commit()
+        db.add_all(kanji_list)
+        db.commit()
         print("done!")
 
     except Exception as e:
-        db_session.rollback()
+        db.rollback()
         print(f"error ... : {e}")
     finally:
-        db_session.close()
+        db.close()
+        
+
+    
+
 
 # ============================================
-def main_init():
-    print("load init ...")
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    
-    cursor.execute("SELECT COUNT (*) FROM canasystems")
-    pass
+
 
 if __name__ == "__main__":
-    seed()
     
+    seed_kanji()
    
     check_db = SessionLocal()
-    count = check_db.query(models.CanaSystem).count()
+    count = check_db.query(models.Kanji).count()
     print(f"session in cana {count} .")
     check_db.close()
     db.close()
